@@ -36,7 +36,7 @@
                             <label for="slug">Slug <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('slug') is-invalid @enderror" 
                                    id="slug" name="slug" value="{{ old('slug') }}" required>
-                            <small class="form-text text-muted">Example: admin, manager, user</small>
+                            <small class="form-text text-muted">Example: admin, manager, user (lowercase, no spaces)</small>
                             @error('slug')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
@@ -53,7 +53,52 @@
                     @enderror
                 </div>
                 
-                <div class="form-group">
+                <!-- Permissions Section -->
+                <div class="card mt-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Role Permissions</h6>
+                        <small class="text-muted">Select the permissions this role will have</small>
+                    </div>
+                    <div class="card-body">
+                        @foreach($permissions as $module => $modulePermissions)
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input select-all" 
+                                           id="select_all_{{ $module }}" data-module="{{ $module }}">
+                                    <label class="custom-control-label font-weight-bold text-capitalize" 
+                                           for="select_all_{{ $module }}">
+                                        {{ ucfirst($module) }} Module
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    @foreach($modulePermissions as $permission)
+                                    <div class="col-md-3 mb-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" 
+                                                   class="custom-control-input permission-checkbox permission-{{ $module }}" 
+                                                   id="permission_{{ $permission->id }}"
+                                                   name="permissions[]" 
+                                                   value="{{ $permission->id }}"
+                                                   {{ old('permissions') && in_array($permission->id, old('permissions')) ? 'checked' : '' }}>
+                                            <label class="custom-control-label" for="permission_{{ $permission->id }}">
+                                                {{ $permission->name }}
+                                                <br>
+                                                <small class="text-muted">{{ $permission->description }}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                
+                <div class="form-group mt-4">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Create Role
                     </button>
@@ -70,6 +115,17 @@
     document.getElementById('name').addEventListener('input', function() {
         let slug = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         document.getElementById('slug').value = slug;
+    });
+    
+    // Select all functionality for each module
+    document.querySelectorAll('.select-all').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const module = this.dataset.module;
+            const checkboxes = document.querySelectorAll(`.permission-${module}`);
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+            });
+        });
     });
 </script>
 @endpush

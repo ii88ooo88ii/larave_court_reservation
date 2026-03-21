@@ -20,12 +20,26 @@ class Role extends Model
         return $this->hasMany(User::class);
     }
 
-    public static function getRolesList()
+    public function permissions()
     {
-        return [
-            1 => 'Admin',
-            2 => 'Manager',
-            3 => 'Regular User',
-        ];
+        return $this->belongsToMany(Permission::class, 'role_permission');
+    }
+
+    // Check if role has specific permission
+    public function hasPermission($permissionSlug)
+    {
+        return $this->permissions()->where('slug', $permissionSlug)->exists();
+    }
+
+    // Check if role has any of the given permissions
+    public function hasAnyPermission($permissions)
+    {
+        return $this->permissions()->whereIn('slug', $permissions)->exists();
+    }
+
+    // Sync permissions
+    public function syncPermissions(array $permissionIds)
+    {
+        $this->permissions()->sync($permissionIds);
     }
 }

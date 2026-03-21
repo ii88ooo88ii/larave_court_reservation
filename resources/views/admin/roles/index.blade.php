@@ -6,9 +6,11 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Roles Management</h1>
+        @if(auth()->user()->canCreateRoles())
         <a href="{{ route('admin.roles.create') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> Add New Role
         </a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -43,6 +45,7 @@
                             <th>Slug</th>
                             <th>Description</th>
                             <th>Users Count</th>
+                            <th>Permissions</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -59,23 +62,35 @@
                             <td>{{ $role->description ?? 'N/A' }}</td>
                             <td>{{ $role->users_count ?? $role->users()->count() }}</td>
                             <td>
+                                <span class="badge badge-info">{{ $role->permissions->count() }} permissions</span>
+                            </td>
+                            <td>
+                                @if(auth()->user()->canEditRoles())
                                 <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
-                                @if($role->id > 3)
-                                    <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    </form>
+                                @endif
+                                
+                                @if(auth()->user()->hasPermission('roles.manage-permissions'))
+                                <a href="{{ route('admin.roles.permissions', $role) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-key"></i> Permissions
+                                </a>
+                                @endif
+                                
+                                @if(auth()->user()->canDeleteRoles() && $role->id > 3)
+                                <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
                                 @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center">No roles found.</td>
+                            <td colspan="7" class="text-center">No roles found.</td>
                         </tr>
                         @endforelse
                     </tbody>

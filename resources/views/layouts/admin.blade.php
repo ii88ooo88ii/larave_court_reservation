@@ -30,13 +30,15 @@
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
             
-            <!-- Nav Item - Dashboard -->
+            <!-- Nav Item - Dashboard (only if user has permission) -->
+            @if(auth()->user()->hasPermission('dashboard.view'))
             <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.dashboard') }}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
+            @endif
             
             <!-- Divider -->
             <hr class="sidebar-divider">
@@ -46,29 +48,35 @@
                 Management
             </div>
             
-            <!-- Nav Item - Users -->
+            <!-- Nav Item - Users (only if user has view permission) -->
+            @if(auth()->user()->canViewUsers())
             <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.users.index') }}">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Users</span>
                 </a>
             </li>
+            @endif
             
-            <!-- Nav Item - Roles -->
+            <!-- Nav Item - Roles (only if user has view permission) -->
+            @if(auth()->user()->canViewRoles())
             <li class="nav-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.roles.index') }}">
                     <i class="fas fa-fw fa-tags"></i>
                     <span>Roles</span>
                 </a>
             </li>
+            @endif
             
-            <!-- Nav Item - Tenants -->
+            <!-- Nav Item - Tenants (only if user has view permission) -->
+            @if(auth()->user()->canViewTenants())
             <li class="nav-item {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.tenants.index') }}">
                     <i class="fas fa-fw fa-building"></i>
                     <span>Tenants</span>
                 </a>
             </li>
+            @endif
             
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -212,7 +220,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
+                        <span>Copyright &copy; Your Website {{ date('Y') }}</span>
                     </div>
                 </div>
             </footer>

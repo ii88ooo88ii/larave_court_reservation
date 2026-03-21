@@ -43,18 +43,83 @@ class User extends Authenticatable
         return $this->belongsTo(Tenant::class);
     }
 
-    public function isAdmin()
+    // Permission checking methods
+    public function hasPermission($permissionSlug)
     {
-        return $this->role_id === 1;
+        if (!$this->role) {
+            return false;
+        }
+        
+        return $this->role->hasPermission($permissionSlug);
     }
 
-    public function isManager()
+    public function hasAnyPermission($permissions)
     {
-        return $this->role_id === 2;
+        if (!$this->role) {
+            return false;
+        }
+        
+        return $this->role->hasAnyPermission($permissions);
     }
 
-    public function isRegularUser()
+    // Convenience methods
+    public function canViewUsers()
     {
-        return $this->role_id === 3;
+        return $this->hasPermission('users.view');
+    }
+
+    public function canCreateUsers()
+    {
+        return $this->hasPermission('users.create');
+    }
+
+    public function canEditUsers()
+    {
+        return $this->hasPermission('users.edit');
+    }
+
+    public function canDeleteUsers()
+    {
+        return $this->hasPermission('users.delete');
+    }
+
+    public function canViewRoles()
+    {
+        return $this->hasPermission('roles.view');
+    }
+
+    public function canCreateRoles()
+    {
+        return $this->hasPermission('roles.create');
+    }
+
+    public function canEditRoles()
+    {
+        return $this->hasPermission('roles.edit');
+    }
+
+    public function canDeleteRoles()
+    {
+        return $this->hasPermission('roles.delete');
+    }
+
+    public function canViewTenants()
+    {
+        return $this->hasPermission('tenants.view');
+    }
+
+    public function canCreateTenants()
+    {
+        return $this->hasPermission('tenants.create');
+    }
+
+    public function canEditTenants()
+    {
+        return $this->hasPermission('tenants.edit');
+    }
+
+    public function canDeleteTenants()
+    {
+        return $this->hasPermission('tenants.delete');
     }
 }
