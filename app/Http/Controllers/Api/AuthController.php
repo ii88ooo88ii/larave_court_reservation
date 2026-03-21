@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // Login API
+    // Login API - Returns token
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -29,7 +29,7 @@ class AuthController extends Controller
         $login = $request->username;
         $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         
-        $user = User::where($field, $login)->first();
+        $user = User::with(['role', 'tenant'])->where($field, $login)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -38,6 +38,9 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Delete existing tokens (optional - for single device login)
+        // $user->tokens()->delete();
+        
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -48,7 +51,9 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'username' => $user->username,
-                    'email' => $user->email
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'tenant' => $user->tenant,
                 ],
                 'access_token' => $token,
                 'token_type' => 'Bearer'
@@ -67,12 +72,46 @@ class AuthController extends Controller
         ]);
     }
 
-    // Get User Profile API
+    // Get current user profile
     public function profile(Request $request)
     {
         return response()->json([
             'success' => true,
-            'data' => $request->user()
+            'data' => $request->user()->load(['role', 'tenant'])
+        ]);
+    }
+
+    // Change password
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password is incorrect'
+            ], 401);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password changed successfully'
         ]);
     }
 }
