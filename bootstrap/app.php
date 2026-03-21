@@ -13,17 +13,29 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Configure web middleware group
+        $middleware->web([
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ]);
+        
         // Configure API middleware
         $middleware->api(prepend: [
             EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
         
-        // Configure web middleware
-        $middleware->web(append: [
-            // Add any web middleware here
+        // Add global middleware
+        $middleware->append([
+            \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
         ]);
         
-        // Alias middleware if needed
+        // Alias middleware
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
             'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
@@ -37,6 +49,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
             'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
+        ]);
+        
+        // CSRF exceptions (if needed)
+        $middleware->validateCsrfTokens(except: [
+            // Add any routes that should skip CSRF verification
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

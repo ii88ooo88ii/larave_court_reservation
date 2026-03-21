@@ -13,6 +13,37 @@
     <!-- Custom styles for this template -->
     <link href="{{ asset('assets/css/sb-admin-2.min.css') }}" rel="stylesheet">
     
+    <!-- Custom styles -->
+    <style>
+        .clickable-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .clickable-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+        }
+        .counter {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    
     @stack('styles')
 </head>
 <body id="page-top">
@@ -30,52 +61,53 @@
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
             
-            <!-- Nav Item - Dashboard (only if user has permission) -->
-            @if(auth()->user()->hasPermission('dashboard.view'))
+            <!-- Nav Item - Dashboard (always visible) -->
             <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.dashboard') }}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
-            @endif
             
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-            
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Management
-            </div>
-            
-            <!-- Nav Item - Users (only if user has view permission) -->
-            @if(auth()->user()->canViewUsers())
-            <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.users.index') }}">
-                    <i class="fas fa-fw fa-users"></i>
-                    <span>Users</span>
-                </a>
-            </li>
-            @endif
-            
-            <!-- Nav Item - Roles (only if user has view permission) -->
-            @if(auth()->user()->canViewRoles())
-            <li class="nav-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.roles.index') }}">
-                    <i class="fas fa-fw fa-tags"></i>
-                    <span>Roles</span>
-                </a>
-            </li>
-            @endif
-            
-            <!-- Nav Item - Tenants (only if user has view permission) -->
-            @if(auth()->user()->canViewTenants())
-            <li class="nav-item {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.tenants.index') }}">
-                    <i class="fas fa-fw fa-building"></i>
-                    <span>Tenants</span>
-                </a>
-            </li>
+            <!-- Only show management links for users who are not regular users -->
+            @if(!auth()->user()->isRegularUser())
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+                
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Management
+                </div>
+                
+                <!-- Nav Item - Users (only if user has view permission) -->
+                @if(auth()->user()->canViewUsers())
+                <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.users.index') }}">
+                        <i class="fas fa-fw fa-users"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+                @endif
+                
+                <!-- Nav Item - Roles (only if user has view permission) -->
+                @if(auth()->user()->canViewRoles())
+                <li class="nav-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.roles.index') }}">
+                        <i class="fas fa-fw fa-tags"></i>
+                        <span>Roles</span>
+                    </a>
+                </li>
+                @endif
+                
+                <!-- Nav Item - Tenants (only if user has view permission) -->
+                @if(auth()->user()->canViewTenants())
+                <li class="nav-item {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.tenants.index') }}">
+                        <i class="fas fa-fw fa-building"></i>
+                        <span>Tenants</span>
+                    </a>
+                </li>
+                @endif
             @endif
             
             <!-- Divider -->
@@ -189,13 +221,9 @@
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#changePasswordModal">
+                                    <i class="fas fa-key fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Change Password
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -224,6 +252,41 @@
                     </div>
                 </div>
             </footer>
+        </div>
+    </div>
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change Password</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('change-password') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" name="current_password" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" name="new_password" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" name="new_password_confirmation" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     

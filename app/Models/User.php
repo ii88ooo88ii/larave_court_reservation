@@ -122,4 +122,19 @@ class User extends Authenticatable
     {
         return $this->hasPermission('tenants.delete');
     }
+
+    public function isAdmin()
+    {
+        return $this->role_id === 1;
+    }
+
+    public function isManager()
+    {
+        return $this->role_id === 2;
+    }
+
+    public function isRegularUser()
+    {
+        return $this->role_id === 3;
+    }
 }
