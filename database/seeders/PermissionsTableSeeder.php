@@ -115,6 +115,35 @@ class PermissionsTableSeeder extends Seeder
                 'action' => 'delete',
                 'description' => 'Can delete tenants',
             ],
+            // Court permissions
+            [
+                'name' => 'View Courts',
+                'slug' => 'courts.view',
+                'module' => 'courts',
+                'action' => 'view',
+                'description' => 'Can view courts list',
+            ],
+            [
+                'name' => 'Create Courts',
+                'slug' => 'courts.create',
+                'module' => 'courts',
+                'action' => 'create',
+                'description' => 'Can create new courts',
+            ],
+            [
+                'name' => 'Edit Courts',
+                'slug' => 'courts.edit',
+                'module' => 'courts',
+                'action' => 'edit',
+                'description' => 'Can edit courts',
+            ],
+            [
+                'name' => 'Delete Courts',
+                'slug' => 'courts.delete',
+                'module' => 'courts',
+                'action' => 'delete',
+                'description' => 'Can delete courts',
+            ],
         ];
 
         foreach ($permissions as $permission) {
