@@ -10,7 +10,7 @@ class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
-    protected $redirectTo = '/admin/dashboard';
+    protected $redirectTo = '/dashboard';
 
     public function __construct()
     {
@@ -34,5 +34,13 @@ class LoginController extends Controller
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
+    }
+    
+    protected function authenticated(Request $request, $user)
+    {
+        if ($user->isRegularUser()) {
+            return redirect()->route('user.dashboard');
+        }
+        return redirect()->route('admin.dashboard');
     }
 }
