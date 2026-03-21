@@ -31,7 +31,7 @@
             <hr class="sidebar-divider my-0">
             
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
+            <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.dashboard') }}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
@@ -43,42 +43,30 @@
             
             <!-- Heading -->
             <div class="sidebar-heading">
-                Interface
+                Management
             </div>
             
-            <!-- Nav Item - Pages -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-                    <i class="fas fa-fw fa-folder"></i>
-                    <span>Pages</span>
-                </a>
-                <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Login Pages:</h6>
-                        <a class="collapse-item" href="{{ route('login') }}">Login</a>
-                        <a class="collapse-item" href="{{ route('register') }}">Register</a>
-                        <a class="collapse-item" href="#">Forgot Password</a>
-                        <div class="collapse-divider"></div>
-                        <h6 class="collapse-header">Other Pages:</h6>
-                        <a class="collapse-item" href="#">404 Page</a>
-                        <a class="collapse-item" href="#">Blank Page</a>
-                    </div>
-                </div>
-            </li>
-            
-            <!-- Nav Item - Charts -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Charts</span>
+            <!-- Nav Item - Users -->
+            <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.users.index') }}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Users</span>
                 </a>
             </li>
             
-            <!-- Nav Item - Tables -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Tables</span>
+            <!-- Nav Item - Roles -->
+            <li class="nav-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.roles.index') }}">
+                    <i class="fas fa-fw fa-tags"></i>
+                    <span>Roles</span>
+                </a>
+            </li>
+            
+            <!-- Nav Item - Tenants -->
+            <li class="nav-item {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.tenants.index') }}">
+                    <i class="fas fa-fw fa-building"></i>
+                    <span>Tenants</span>
                 </a>
             </li>
             

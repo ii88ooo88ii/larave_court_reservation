@@ -8,8 +8,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Remove any User::factory() calls
         $this->call([
+            RolesTableSeeder::class,
+            TenantsTableSeeder::class,
             AdminUserSeeder::class,
         ]);
     }
