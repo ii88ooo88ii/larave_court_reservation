@@ -17,7 +17,6 @@ class Court extends Model
         'surface',
         'is_indoor',
         'has_floodlights',
-        'hourly_rate',
         'capacity',
         'description',
         'facilities',
@@ -29,7 +28,6 @@ class Court extends Model
         'is_indoor' => 'boolean',
         'has_floodlights' => 'boolean',
         'is_active' => 'boolean',
-        'hourly_rate' => 'decimal:2',
     ];
 
     public function tenant()
@@ -47,35 +45,39 @@ class Court extends Model
         return $this->hasMany(Pricing::class);
     }
 
+    public function getCurrentPricing()
+    {
+        return $this->pricings()
+            ->where('is_active', true)
+            ->where('type', 'standard')
+            ->first();
+    }
+
+    public function getPricingForDateTime($dateTime)
+    {
+        $dayOfWeek = $dateTime->dayOfWeekIso; // 1-7 (Monday=1, Sunday=7)
+        $time = $dateTime->format('H:i:s');
+        
+        $pricing = $this->pricings()
+            ->where('is_active', true)
+            ->where(function($q) use ($dayOfWeek, $time) {
+                $q->whereJsonContains('days_of_week', $dayOfWeek)
+                  ->where('start_time', '<=', $time)
+                  ->where('end_time', '>=', $time);
+            })
+            ->orWhere(function($q) {
+                $q->whereNull('days_of_week')
+                  ->where('type', 'standard');
+            })
+            ->first();
+            
+        return $pricing;
+    }
+
     // Scope to filter by tenant
     public function scopeForTenant($query, $tenantId = null)
     {
         $tenantId = $tenantId ?? auth()->user()->tenant_id;
         return $query->where('tenant_id', $tenantId);
-    }
-
-    public function getActivePricing()
-    {
-        return $this->pricings()->where('is_active', true)->first();
-    }
-
-    public function getPricingForTime($dayOfWeek, $time = null)
-    {
-        $query = $this->pricings()
-            ->where('is_active', true)
-            ->where('tenant_id', $this->tenant_id);
-        
-        if ($time) {
-            $query->where(function($q) use ($time) {
-                $q->where('start_time', '<=', $time)
-                  ->where('end_time', '>=', $time);
-            });
-        }
-        
-        if ($dayOfWeek) {
-            $query->whereJsonContains('days_of_week', $dayOfWeek);
-        }
-        
-        return $query->first();
     }
 }

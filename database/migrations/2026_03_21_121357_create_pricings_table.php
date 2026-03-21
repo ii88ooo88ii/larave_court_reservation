@@ -13,8 +13,10 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
             $table->foreignId('court_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('type'); // hourly, daily, weekly, monthly, package
-            $table->decimal('price', 10, 2);
+            $table->string('type')->default('standard'); // standard, peak, off_peak, holiday
+            $table->decimal('base_price', 10, 2);
+            $table->decimal('peak_price', 10, 2)->nullable();
+            $table->decimal('off_peak_price', 10, 2)->nullable();
             $table->string('currency')->default('USD');
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();

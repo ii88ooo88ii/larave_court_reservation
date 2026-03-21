@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pricing;
 use App\Models\Court;
+use App\Models\AdditionalFee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -23,7 +24,7 @@ class PricingController extends Controller
     public function index(Request $request)
     {
         $courtId = $request->get('court_id');
-        $query = Pricing::forTenant()->with('court');
+        $query = Pricing::forTenant()->with('court', 'additionalFees');
         
         if ($courtId) {
             $query->where('court_id', $courtId);
@@ -40,14 +41,22 @@ class PricingController extends Controller
         $courts = Court::forTenant()->where('is_active', true)->get();
         $selectedCourt = $request->get('court_id');
         $pricingTypes = [
-            'hourly' => 'Hourly Rate',
-            'daily' => 'Daily Rate',
-            'weekly' => 'Weekly Rate',
-            'monthly' => 'Monthly Rate',
-            'package' => 'Package Deal'
+            'standard' => 'Standard Rate',
+            'peak' => 'Peak Hours Rate',
+            'off_peak' => 'Off-Peak Hours Rate',
+            'holiday' => 'Holiday Rate'
+        ];
+        $daysOfWeek = [
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday'
         ];
         
-        return view('admin.pricings.create', compact('courts', 'selectedCourt', 'pricingTypes'));
+        return view('admin.pricings.create', compact('courts', 'selectedCourt', 'pricingTypes', 'daysOfWeek'));
     }
 
     public function store(Request $request)
@@ -55,8 +64,10 @@ class PricingController extends Controller
         $validator = Validator::make($request->all(), [
             'court_id' => 'required|exists:courts,id',
             'name' => 'required|string|max:255',
-            'type' => 'required|string|in:hourly,daily,weekly,monthly,package',
-            'price' => 'required|numeric|min:0',
+            'type' => 'required|string|in:standard,peak,off_peak,holiday',
+            'base_price' => 'required|numeric|min:0',
+            'peak_price' => 'nullable|numeric|min:0',
+            'off_peak_price' => 'nullable|numeric|min:0',
             'currency' => 'required|string|max:3',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
@@ -75,9 +86,15 @@ class PricingController extends Controller
         $data = $request->all();
         $data['tenant_id'] = auth()->user()->tenant_id;
         
+        // Handle days_of_week
         if ($request->has('days_of_week')) {
             $data['days_of_week'] = json_encode($request->days_of_week);
         }
+        
+        // Convert prices to float
+        $data['base_price'] = floatval($request->base_price);
+        $data['peak_price'] = $request->peak_price ? floatval($request->peak_price) : null;
+        $data['off_peak_price'] = $request->off_peak_price ? floatval($request->off_peak_price) : null;
         
         Pricing::create($data);
 
@@ -89,14 +106,22 @@ class PricingController extends Controller
     {
         $courts = Court::forTenant()->where('is_active', true)->get();
         $pricingTypes = [
-            'hourly' => 'Hourly Rate',
-            'daily' => 'Daily Rate',
-            'weekly' => 'Weekly Rate',
-            'monthly' => 'Monthly Rate',
-            'package' => 'Package Deal'
+            'standard' => 'Standard Rate',
+            'peak' => 'Peak Hours Rate',
+            'off_peak' => 'Off-Peak Hours Rate',
+            'holiday' => 'Holiday Rate'
+        ];
+        $daysOfWeek = [
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday'
         ];
         
-        return view('admin.pricings.edit', compact('pricing', 'courts', 'pricingTypes'));
+        return view('admin.pricings.edit', compact('pricing', 'courts', 'pricingTypes', 'daysOfWeek'));
     }
 
     public function update(Request $request, Pricing $pricing)
@@ -104,8 +129,10 @@ class PricingController extends Controller
         $validator = Validator::make($request->all(), [
             'court_id' => 'required|exists:courts,id',
             'name' => 'required|string|max:255',
-            'type' => 'required|string|in:hourly,daily,weekly,monthly,package',
-            'price' => 'required|numeric|min:0',
+            'type' => 'required|string|in:standard,peak,off_peak,holiday',
+            'base_price' => 'required|numeric|min:0',
+            'peak_price' => 'nullable|numeric|min:0',
+            'off_peak_price' => 'nullable|numeric|min:0',
             'currency' => 'required|string|max:3',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
@@ -123,9 +150,17 @@ class PricingController extends Controller
 
         $data = $request->all();
         
+        // Handle days_of_week
         if ($request->has('days_of_week')) {
             $data['days_of_week'] = json_encode($request->days_of_week);
+        } else {
+            $data['days_of_week'] = null;
         }
+        
+        // Convert prices to float
+        $data['base_price'] = floatval($request->base_price);
+        $data['peak_price'] = $request->peak_price ? floatval($request->peak_price) : null;
+        $data['off_peak_price'] = $request->off_peak_price ? floatval($request->off_peak_price) : null;
         
         $pricing->update($data);
 

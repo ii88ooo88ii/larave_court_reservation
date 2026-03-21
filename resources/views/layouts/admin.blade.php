@@ -79,6 +79,26 @@
                     Management
                 </div>
 
+                <!-- Nav Item - Pricing (only for admin) -->
+                @if(auth()->user()->isAdmin())
+                <li class="nav-item {{ request()->routeIs('admin.pricings.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.pricings.index') }}">
+                        <i class="fas fa-fw fa-dollar-sign"></i>
+                        <span>Pricing</span>
+                    </a>
+                </li>
+                @endif
+
+                <!-- Nav Item - Additional Fees (only for admin) -->
+                @if(auth()->user()->isAdmin())
+                <li class="nav-item {{ request()->routeIs('admin.additional-fees.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.additional-fees.index') }}">
+                        <i class="fas fa-fw fa-plus-circle"></i>
+                        <span>Additional Fees</span>
+                    </a>
+                </li>
+                @endif
+
                 <!-- Nav Item - Courts (only for admin) -->
                 @if(auth()->user()->isAdmin())
                 <li class="nav-item {{ request()->routeIs('admin.courts.*') ? 'active' : '' }}">

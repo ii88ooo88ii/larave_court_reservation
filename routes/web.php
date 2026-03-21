@@ -5,7 +5,10 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TenantController;
-use App\Http\Controllers\Admin\CourtController; // Add this line
+use App\Http\Controllers\Admin\CourtController;
+use App\Http\Controllers\Admin\CourtTypeController;
+use App\Http\Controllers\Admin\PricingController;
+use App\Http\Controllers\Admin\AdditionalFeeController; 
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\ProfileController;
 
@@ -63,6 +66,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Court Management - ADD THESE LINES
     Route::resource('courts', CourtController::class)->except(['show']);
     Route::get('courts/{court}/toggle-status', [CourtController::class, 'toggleStatus'])->name('courts.toggle-status');
+
+    // Pricing Management
+    Route::resource('pricings', PricingController::class)->except(['show']);
+    Route::get('pricings/{pricing}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricings.toggle-status');
+
+    // Additional Fees Management
+    Route::resource('additional-fees', AdditionalFeeController::class)->except(['show']);
+    Route::get('additional-fees/{additionalFee}/toggle-status', [AdditionalFeeController::class, 'toggleStatus'])->name('additional-fees.toggle-status');
+
 });
 
 // User Routes (Regular Users)

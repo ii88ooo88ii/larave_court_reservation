@@ -14,7 +14,9 @@ class Pricing extends Model
         'court_id',
         'name',
         'type',
-        'price',
+        'base_price',
+        'peak_price',
+        'off_peak_price',
         'currency',
         'start_time',
         'end_time',
@@ -28,7 +30,11 @@ class Pricing extends Model
     protected $casts = [
         'days_of_week' => 'array',
         'is_active' => 'boolean',
-        'price' => 'decimal:2',
+        'base_price' => 'decimal:2',
+        'peak_price' => 'decimal:2',
+        'off_peak_price' => 'decimal:2',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
     ];
 
     public function tenant()
@@ -41,37 +47,21 @@ class Pricing extends Model
         return $this->belongsTo(Court::class);
     }
 
+    public function additionalFees()
+    {
+        return $this->hasMany(AdditionalFee::class);
+    }
+
+    public function calculatePrice($hours, $isPeak = false)
+    {
+        $price = $isPeak ? $this->peak_price : ($this->off_peak_price ?: $this->base_price);
+        return $price * $hours;
+    }
+
     // Scope to filter by tenant
     public function scopeForTenant($query, $tenantId = null)
     {
         $tenantId = $tenantId ?? auth()->user()->tenant_id;
         return $query->where('tenant_id', $tenantId);
-    }
-
-    public function getFormattedPriceAttribute()
-    {
-        return $this->currency . ' ' . number_format($this->price, 2);
-    }
-    
-    public function getDaysOfWeekLabelsAttribute()
-    {
-        if (!$this->days_of_week) return null;
-        
-        $days = [
-            1 => 'Monday',
-            2 => 'Tuesday',
-            3 => 'Wednesday',
-            4 => 'Thursday',
-            5 => 'Friday',
-            6 => 'Saturday',
-            7 => 'Sunday',
-        ];
-        
-        $selectedDays = [];
-        foreach ($this->days_of_week as $day) {
-            $selectedDays[] = $days[$day];
-        }
-        
-        return implode(', ', $selectedDays);
     }
 }
