@@ -78,6 +78,16 @@
                 <div class="sidebar-heading">
                     Management
                 </div>
+
+                <!-- Nav Item - Courts (only for admin) -->
+                @if(auth()->user()->isAdmin())
+                <li class="nav-item {{ request()->routeIs('admin.courts.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.courts.index') }}">
+                        <i class="fas fa-fw fa-table-tennis"></i>
+                        <span>Courts</span>
+                    </a>
+                </li>
+                @endif
                 
                 <!-- Nav Item - Users (only if user has view permission) -->
                 @if(auth()->user()->canViewUsers())
