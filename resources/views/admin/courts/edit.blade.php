@@ -3,7 +3,6 @@
 @section('title', 'Edit Court')
 
 @section('content')
-<div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Edit Court: {{ $court->name }}</h1>
         <a href="{{ route('admin.courts.index') }}" class="btn btn-secondary btn-sm">
@@ -95,15 +94,6 @@
                 </div>
                 
                 <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="hourly_rate">Hourly Rate ($) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" class="form-control @error('hourly_rate') is-invalid @enderror" name="hourly_rate" value="{{ old('hourly_rate', $court->hourly_rate) }}" required>
-                            @error('hourly_rate')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
                     
                     <div class="col-md-4">
                         <div class="form-group">
@@ -183,5 +173,5 @@
             </form>
         </div>
     </div>
-</div>
+
 @endsection

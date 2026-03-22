@@ -38,9 +38,15 @@ class LoginController extends Controller
     
     protected function authenticated(Request $request, $user)
     {
+        // Regenerate session to prevent fixation
+        $request->session()->regenerate();
+        
+        // Redirect based on role
         if ($user->isRegularUser()) {
             return redirect()->route('user.dashboard');
         }
+        
+        // Admin and Manager go to admin dashboard
         return redirect()->route('admin.dashboard');
     }
 }

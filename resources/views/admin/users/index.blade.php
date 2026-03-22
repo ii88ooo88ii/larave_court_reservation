@@ -3,7 +3,6 @@
 @section('title', 'Users Management')
 
 @section('content')
-<div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Users Management</h1>
         <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
@@ -90,5 +89,5 @@
             {{ $users->links() }}
         </div>
     </div>
-</div>
+
 @endsection

@@ -3,7 +3,6 @@
 @section('title', 'Manage Role Permissions')
 
 @section('content')
-<div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Manage Permissions: {{ $role->name }}</h1>
         <a href="{{ route('admin.roles.index') }}" class="btn btn-secondary btn-sm">
@@ -56,5 +55,5 @@
             </form>
         </div>
     </div>
-</div>
+
 @endsection

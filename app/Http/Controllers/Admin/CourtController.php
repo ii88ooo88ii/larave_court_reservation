@@ -31,22 +31,22 @@ class CourtController extends Controller
 
     public function create()
     {
-        $tenants = Tenant::where('is_active', true)->get();
-        $courtTypes = CourtType::forTenant()->where('is_active', true)->get();
-        $courtClassification = ['standard' => 'Standard', 'vip' => 'VIP', 'premium' => 'Premium'];
-        $surfaces = ['clay' => 'Clay', 'grass' => 'Grass', 'hard' => 'Hard', 'carpet' => 'Carpet'];
-        $facilities = [
-            'locker_room' => 'Locker Room',
-            'shower' => 'Shower',
-            'parking' => 'Parking',
-            'cafe' => 'Cafe',
-            'pro_shop' => 'Pro Shop',
-            'lighting' => 'Lighting',
-            'seating' => 'Seating Area',
-            'water' => 'Water Station'
-        ];
-        
-        return view('admin.courts.create', compact('tenants', 'courtTypes', 'courtClassification', 'surfaces', 'facilities'));
+         $tenants = Tenant::where('is_active', true)->get();
+    $courtTypes = CourtType::where('is_active', true)->get();
+    $courtClassification = ['standard' => 'Standard', 'vip' => 'VIP', 'premium' => 'Premium'];
+    $surfaces = ['clay' => 'Clay', 'grass' => 'Grass', 'hard' => 'Hard', 'carpet' => 'Carpet'];
+    $facilities = [
+        'locker_room' => 'Locker Room',
+        'shower' => 'Shower',
+        'parking' => 'Parking',
+        'cafe' => 'Cafe',
+        'pro_shop' => 'Pro Shop',
+        'lighting' => 'Lighting',
+        'seating' => 'Seating Area',
+        'water' => 'Water Station'
+    ];
+    
+    return view('admin.courts.create', compact('tenants', 'courtTypes', 'courtClassification', 'surfaces', 'facilities'));
     }
 
     public function store(Request $request)

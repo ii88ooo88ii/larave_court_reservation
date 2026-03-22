@@ -23,21 +23,21 @@ class AdditionalFeeController extends Controller
     public function index(Request $request)
     {
         $pricingId = $request->get('pricing_id');
-        $query = AdditionalFee::forTenant()->with('pricing');
+        $query = AdditionalFee::with('pricing');
         
         if ($pricingId) {
             $query->where('pricing_id', $pricingId);
         }
         
         $fees = $query->latest()->paginate(10);
-        $pricings = Pricing::forTenant()->where('is_active', true)->get();
+        $pricings = Pricing::where('is_active', true)->get();
         
         return view('admin.additional-fees.index', compact('fees', 'pricings', 'pricingId'));
     }
 
     public function create(Request $request)
     {
-        $pricings = Pricing::forTenant()->where('is_active', true)->get();
+        $pricings = Pricing::where('is_active', true)->get();
         $selectedPricing = $request->get('pricing_id');
         $feeTypes = [
             'fixed' => 'Fixed Amount',
@@ -74,7 +74,7 @@ class AdditionalFeeController extends Controller
 
     public function edit(AdditionalFee $additionalFee)
     {
-        $pricings = Pricing::forTenant()->where('is_active', true)->get();
+        $pricings = Pricing::where('is_active', true)->get();
         $feeTypes = [
             'fixed' => 'Fixed Amount',
             'percentage' => 'Percentage of Subtotal'

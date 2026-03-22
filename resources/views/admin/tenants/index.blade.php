@@ -3,7 +3,6 @@
 @section('title', 'Tenants Management')
 
 @section('content')
-<div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Tenants Management</h1>
         <a href="{{ route('admin.tenants.create') }}" class="btn btn-primary btn-sm">
@@ -94,5 +93,5 @@
             {{ $tenants->links() }}
         </div>
     </div>
-</div>
+
 @endsection
