@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CourtTypeController;
 use App\Http\Controllers\Admin\PricingController;
 use App\Http\Controllers\Admin\AdditionalFeeController;
 use App\Http\Controllers\Admin\ReservationController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\ProfileController;
 
@@ -75,6 +76,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::post('calculate-price', [ReservationController::class, 'calculatePrice'])->name('reservations.calculate-price');
     
+    // Reports
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+
 });
 
 // User Routes (Regular Users)

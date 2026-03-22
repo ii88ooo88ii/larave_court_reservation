@@ -23,10 +23,7 @@ class CourtTypeController extends Controller
 
     public function index()
     {
-        $courtTypes = CourtType::forTenant()
-            ->with('tenant', 'courts')
-            ->latest()
-            ->paginate(10);
+        $courtTypes = CourtType::with('tenant', 'courts')->latest()->paginate(10);
         return view('admin.court-types.index', compact('courtTypes'));
     }
 

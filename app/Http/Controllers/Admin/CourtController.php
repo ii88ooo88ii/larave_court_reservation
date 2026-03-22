@@ -14,7 +14,6 @@ class CourtController extends Controller
 {
     public function __construct()
     {
-        // Only allow admin access
         $this->middleware(function ($request, $next) {
             if (!auth()->user()->isAdmin()) {
                 abort(403, 'Only administrators can manage courts.');
@@ -25,40 +24,40 @@ class CourtController extends Controller
 
     public function index()
     {
-        $courts = Court::forTenant()->with('tenant', 'courtType')->latest()->paginate(10);
+        $courts = Court::with(['tenant', 'courtType'])->latest()->paginate(10);
         return view('admin.courts.index', compact('courts'));
     }
 
     public function create()
     {
-         $tenants = Tenant::where('is_active', true)->get();
-    $courtTypes = CourtType::where('is_active', true)->get();
-    $courtClassification = ['standard' => 'Standard', 'vip' => 'VIP', 'premium' => 'Premium'];
-    $surfaces = ['clay' => 'Clay', 'grass' => 'Grass', 'hard' => 'Hard', 'carpet' => 'Carpet'];
-    $facilities = [
-        'locker_room' => 'Locker Room',
-        'shower' => 'Shower',
-        'parking' => 'Parking',
-        'cafe' => 'Cafe',
-        'pro_shop' => 'Pro Shop',
-        'lighting' => 'Lighting',
-        'seating' => 'Seating Area',
-        'water' => 'Water Station'
-    ];
-    
-    return view('admin.courts.create', compact('tenants', 'courtTypes', 'courtClassification', 'surfaces', 'facilities'));
+        $tenants = Tenant::where('is_active', true)->get();
+        $courtTypes = CourtType::where('is_active', true)->get();
+        $courtClassification = ['standard' => 'Standard', 'vip' => 'VIP', 'premium' => 'Premium'];
+        $surfaces = ['clay' => 'Clay', 'grass' => 'Grass', 'hard' => 'Hard', 'carpet' => 'Carpet'];
+        $facilities = [
+            'locker_room' => 'Locker Room',
+            'shower' => 'Shower',
+            'parking' => 'Parking',
+            'cafe' => 'Cafe',
+            'pro_shop' => 'Pro Shop',
+            'lighting' => 'Lighting',
+            'seating' => 'Seating Area',
+            'water' => 'Water Station'
+        ];
+        
+        return view('admin.courts.create', compact('tenants', 'courtTypes', 'courtClassification', 'surfaces', 'facilities'));
     }
 
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'tenant_id' => 'required|exists:tenants,id',
+            'court_type_id' => 'required|exists:court_types,id',
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:standard,vip,premium',
             'surface' => 'nullable|string|max:50',
             'is_indoor' => 'boolean',
             'has_floodlights' => 'boolean',
-            'hourly_rate' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1|max:10',
             'description' => 'nullable|string',
             'facilities' => 'array',
@@ -72,10 +71,12 @@ class CourtController extends Controller
 
         $data = $request->except(['facilities', 'image']);
         
+        // Handle facilities (store as JSON)
         if ($request->has('facilities')) {
             $data['facilities'] = json_encode($request->facilities);
         }
         
+        // Handle image upload
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('courts', 'public');
             $data['image'] = $imagePath;
@@ -90,7 +91,7 @@ class CourtController extends Controller
     public function edit(Court $court)
     {
         $tenants = Tenant::where('is_active', true)->get();
-        $courtTypes = CourtType::forTenant()->where('is_active', true)->get();
+        $courtTypes = CourtType::where('is_active', true)->get();
         $courtClassification = ['standard' => 'Standard', 'vip' => 'VIP', 'premium' => 'Premium'];
         $surfaces = ['clay' => 'Clay', 'grass' => 'Grass', 'hard' => 'Hard', 'carpet' => 'Carpet'];
         $facilities = [
@@ -112,12 +113,12 @@ class CourtController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'tenant_id' => 'required|exists:tenants,id',
+            'court_type_id' => 'required|exists:court_types,id',
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:standard,vip,premium',
             'surface' => 'nullable|string|max:50',
             'is_indoor' => 'boolean',
             'has_floodlights' => 'boolean',
-            'hourly_rate' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1|max:10',
             'description' => 'nullable|string',
             'facilities' => 'array',
@@ -131,13 +132,16 @@ class CourtController extends Controller
 
         $data = $request->except(['facilities', 'image']);
         
+        // Handle facilities
         if ($request->has('facilities')) {
             $data['facilities'] = json_encode($request->facilities);
         } else {
             $data['facilities'] = null;
         }
         
+        // Handle image upload
         if ($request->hasFile('image')) {
+            // Delete old image
             if ($court->image) {
                 Storage::disk('public')->delete($court->image);
             }
@@ -153,6 +157,7 @@ class CourtController extends Controller
 
     public function destroy(Court $court)
     {
+        // Delete image if exists
         if ($court->image) {
             Storage::disk('public')->delete($court->image);
         }

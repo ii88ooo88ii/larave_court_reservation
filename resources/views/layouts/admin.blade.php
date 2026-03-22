@@ -101,6 +101,18 @@
                     Management
                 </div>
 
+                <!-- Nav Item - Reports (only for admin) -->
+                @if(auth()->user()->isAdmin())
+                <li class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                    <a class="nav-link no-ajax" href="{{ route('admin.reports.index') }}">
+                        <i class="fas fa-fw fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                @endif
+
+                <hr class="sidebar-divider">
+
                 <!-- ==================== RESERVATIONS DROPDOWN ==================== -->
                 <li class="nav-item {{ request()->routeIs('admin.reservations.*') ? 'active' : '' }}">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReservations" aria-expanded="true" aria-controls="collapseReservations">
