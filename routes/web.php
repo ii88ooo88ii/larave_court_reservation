@@ -8,7 +8,8 @@ use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\CourtController;
 use App\Http\Controllers\Admin\CourtTypeController;
 use App\Http\Controllers\Admin\PricingController;
-use App\Http\Controllers\Admin\AdditionalFeeController; 
+use App\Http\Controllers\Admin\AdditionalFeeController;
+use App\Http\Controllers\Admin\ReservationController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\ProfileController;
 
@@ -36,45 +37,41 @@ Route::middleware(['auth'])->get('/dashboard', function () {
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
-    // User Management
-    Route::resource('users', UserController::class)->except(['show']);
-    Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-    Route::get('users/create', [UserController::class, 'create'])->name('users.create');
-    Route::post('users', [UserController::class, 'store'])->name('users.store');
+    // User Management - Use only resource, no individual routes
+    Route::resource('users', UserController::class);
     
-    // Role Management
-    Route::resource('roles', RoleController::class)->except(['show']);
-    Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
-    Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
-    Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
-    Route::get('roles/create', [RoleController::class, 'create'])->name('roles.create');
-    Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+    // Role Management - Use only resource
+    Route::resource('roles', RoleController::class);
     Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
     Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name('roles.update-permissions');
     
-    // Tenant Management
-    Route::resource('tenants', TenantController::class)->except(['show']);
-    Route::get('tenants/{tenant}/edit', [TenantController::class, 'edit'])->name('tenants.edit');
-    Route::put('tenants/{tenant}', [TenantController::class, 'update'])->name('tenants.update');
-    Route::delete('tenants/{tenant}', [TenantController::class, 'destroy'])->name('tenants.destroy');
-    Route::get('tenants/create', [TenantController::class, 'create'])->name('tenants.create');
-    Route::post('tenants', [TenantController::class, 'store'])->name('tenants.store');
+    // Tenant Management - Use only resource
+    Route::resource('tenants', TenantController::class);
     Route::get('tenants/{tenant}/toggle-status', [TenantController::class, 'toggleStatus'])->name('tenants.toggle-status');
     
-    // Court Management - ADD THESE LINES
-    Route::resource('courts', CourtController::class)->except(['show']);
+    // Court Management - Use only resource
+    Route::resource('courts', CourtController::class);
     Route::get('courts/{court}/toggle-status', [CourtController::class, 'toggleStatus'])->name('courts.toggle-status');
-
-    // Pricing Management
-    Route::resource('pricings', PricingController::class)->except(['show']);
+    
+    // Court Type Management - Use only resource
+    Route::resource('court-types', CourtTypeController::class);
+    Route::get('court-types/{courtType}/toggle-status', [CourtTypeController::class, 'toggleStatus'])->name('court-types.toggle-status');
+    
+    // Pricing Management - Use only resource
+    Route::resource('pricings', PricingController::class);
     Route::get('pricings/{pricing}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricings.toggle-status');
-
-    // Additional Fees Management
-    Route::resource('additional-fees', AdditionalFeeController::class)->except(['show']);
+    
+    // Additional Fees Management - Use only resource
+    Route::resource('additional-fees', AdditionalFeeController::class);
     Route::get('additional-fees/{additionalFee}/toggle-status', [AdditionalFeeController::class, 'toggleStatus'])->name('additional-fees.toggle-status');
-
+    
+    // Reservation Routes
+    Route::resource('reservations', ReservationController::class);
+    Route::post('reservations/{reservation}/extend', [ReservationController::class, 'extend'])->name('reservations.extend');
+    Route::post('reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+    Route::get('reservations-calendar', [ReservationController::class, 'calendar'])->name('reservations.calendar');
+    Route::post('check-availability', [ReservationController::class, 'checkAvailability'])->name('reservations.check-availability');
+    Route::get('available-slots', [ReservationController::class, 'getAvailableSlots'])->name('reservations.available-slots');
 });
 
 // User Routes (Regular Users)

@@ -42,6 +42,17 @@
                 transform: translateY(0);
             }
         }
+        /* Active dropdown styling */
+        .nav-item .collapse.show {
+            background-color: rgba(0,0,0,0.1);
+        }
+        .collapse-inner a {
+            padding: 0.5rem 1rem;
+            display: block;
+        }
+        .collapse-inner a:hover {
+            background-color: #f8f9fc;
+        }
     </style>
     
     @stack('styles')
@@ -79,65 +90,149 @@
                     Management
                 </div>
 
-                <!-- Nav Item - Pricing (only for admin) -->
-                @if(auth()->user()->isAdmin())
-                <li class="nav-item {{ request()->routeIs('admin.pricings.*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('admin.pricings.index') }}">
-                        <i class="fas fa-fw fa-dollar-sign"></i>
-                        <span>Pricing</span>
+                <!-- ==================== RESERVATIONS DROPDOWN ==================== -->
+                <li class="nav-item {{ request()->routeIs('admin.reservations.*') ? 'active' : '' }}">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReservations" aria-expanded="true" aria-controls="collapseReservations">
+                        <i class="fas fa-fw fa-calendar-alt"></i>
+                        <span>Reservations</span>
                     </a>
+                    <div id="collapseReservations" class="collapse" aria-labelledby="headingReservations" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Reservation Management:</h6>
+                            <a class="collapse-item {{ request()->routeIs('admin.reservations.index') ? 'active' : '' }}" href="{{ route('admin.reservations.index') }}">
+                                <i class="fas fa-list fa-sm fa-fw mr-2"></i> All Reservations
+                            </a>
+                            <a class="collapse-item {{ request()->routeIs('admin.reservations.calendar') ? 'active' : '' }}" href="{{ route('admin.reservations.calendar') }}">
+                                <i class="fas fa-calendar-week fa-sm fa-fw mr-2"></i> Calendar View
+                            </a>
+                            <a class="collapse-item" href="{{ route('admin.reservations.create') }}">
+                                <i class="fas fa-plus fa-sm fa-fw mr-2"></i> New Reservation
+                            </a>
+                        </div>
+                    </div>
                 </li>
-                @endif
-
-                <!-- Nav Item - Additional Fees (only for admin) -->
+                
+                <!-- ==================== COURTS DROPDOWN ==================== -->
                 @if(auth()->user()->isAdmin())
-                <li class="nav-item {{ request()->routeIs('admin.additional-fees.*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('admin.additional-fees.index') }}">
-                        <i class="fas fa-fw fa-plus-circle"></i>
-                        <span>Additional Fees</span>
-                    </a>
-                </li>
-                @endif
-
-                <!-- Nav Item - Courts (only for admin) -->
-                @if(auth()->user()->isAdmin())
-                <li class="nav-item {{ request()->routeIs('admin.courts.*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('admin.courts.index') }}">
+                <li class="nav-item {{ request()->routeIs('admin.courts.*') || request()->routeIs('admin.court-types.*') ? 'active' : '' }}">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCourts" aria-expanded="true" aria-controls="collapseCourts">
                         <i class="fas fa-fw fa-table-tennis"></i>
                         <span>Courts</span>
                     </a>
+                    <div id="collapseCourts" class="collapse" aria-labelledby="headingCourts" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Court Management:</h6>
+                            <a class="collapse-item {{ request()->routeIs('admin.courts.index') ? 'active' : '' }}" href="{{ route('admin.courts.index') }}">
+                                <i class="fas fa-table-tennis fa-sm fa-fw mr-2"></i> All Courts
+                            </a>
+                            <a class="collapse-item" href="{{ route('admin.courts.create') }}">
+                                <i class="fas fa-plus fa-sm fa-fw mr-2"></i> Add New Court
+                            </a>
+                            <div class="collapse-divider"></div>
+                            <h6 class="collapse-header">Court Types:</h6>
+                            <a class="collapse-item {{ request()->routeIs('admin.court-types.index') ? 'active' : '' }}" href="{{ route('admin.court-types.index') }}">
+                                <i class="fas fa-list fa-sm fa-fw mr-2"></i> Court Types
+                            </a>
+                            <a class="collapse-item" href="{{ route('admin.court-types.create') }}">
+                                <i class="fas fa-plus fa-sm fa-fw mr-2"></i> Add Court Type
+                            </a>
+                        </div>
+                    </div>
                 </li>
                 @endif
                 
-                <!-- Nav Item - Users (only if user has view permission) -->
-                @if(auth()->user()->canViewUsers())
-                <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('admin.users.index') }}">
+                <!-- ==================== PRICING DROPDOWN ==================== -->
+                @if(auth()->user()->isAdmin())
+                <li class="nav-item {{ request()->routeIs('admin.pricings.*') || request()->routeIs('admin.additional-fees.*') ? 'active' : '' }}">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePricing" aria-expanded="true" aria-controls="collapsePricing">
+                        <i class="fas fa-fw fa-dollar-sign"></i>
+                        <span>Pricing</span>
+                    </a>
+                    <div id="collapsePricing" class="collapse" aria-labelledby="headingPricing" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Rate Management:</h6>
+                            <a class="collapse-item {{ request()->routeIs('admin.pricings.index') ? 'active' : '' }}" href="{{ route('admin.pricings.index') }}">
+                                <i class="fas fa-dollar-sign fa-sm fa-fw mr-2"></i> Pricing Rates
+                            </a>
+                            <a class="collapse-item" href="{{ route('admin.pricings.create') }}">
+                                <i class="fas fa-plus fa-sm fa-fw mr-2"></i> Add New Rate
+                            </a>
+                            <div class="collapse-divider"></div>
+                            <h6 class="collapse-header">Additional Fees:</h6>
+                            <a class="collapse-item {{ request()->routeIs('admin.additional-fees.index') ? 'active' : '' }}" href="{{ route('admin.additional-fees.index') }}">
+                                <i class="fas fa-plus-circle fa-sm fa-fw mr-2"></i> All Fees
+                            </a>
+                            <a class="collapse-item" href="{{ route('admin.additional-fees.create') }}">
+                                <i class="fas fa-plus fa-sm fa-fw mr-2"></i> Add New Fee
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                @endif
+                
+                <!-- ==================== USERS DROPDOWN ==================== -->
+                @if(auth()->user()->canViewUsers() || auth()->user()->canViewRoles() || auth()->user()->canViewTenants())
+                <li class="nav-item {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') || request()->routeIs('admin.tenants.*') ? 'active' : '' }}">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUsers" aria-expanded="true" aria-controls="collapseUsers">
                         <i class="fas fa-fw fa-users"></i>
-                        <span>Users</span>
+                        <span>Users & Roles</span>
+                    </a>
+                    <div id="collapseUsers" class="collapse" aria-labelledby="headingUsers" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            @if(auth()->user()->canViewUsers())
+                            <h6 class="collapse-header">User Management:</h6>
+                            <a class="collapse-item {{ request()->routeIs('admin.users.index') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                                <i class="fas fa-users fa-sm fa-fw mr-2"></i> All Users
+                            </a>
+                            <a class="collapse-item" href="{{ route('admin.users.create') }}">
+                                <i class="fas fa-user-plus fa-sm fa-fw mr-2"></i> Add New User
+                            </a>
+                            @endif
+                            
+                            @if(auth()->user()->canViewRoles())
+                            <div class="collapse-divider"></div>
+                            <h6 class="collapse-header">Role Management:</h6>
+                            <a class="collapse-item {{ request()->routeIs('admin.roles.index') ? 'active' : '' }}" href="{{ route('admin.roles.index') }}">
+                                <i class="fas fa-tags fa-sm fa-fw mr-2"></i> All Roles
+                            </a>
+                            <a class="collapse-item" href="{{ route('admin.roles.create') }}">
+                                <i class="fas fa-plus fa-sm fa-fw mr-2"></i> Create New Role
+                            </a>
+                            @endif
+                            
+                            @if(auth()->user()->canViewTenants())
+                            <div class="collapse-divider"></div>
+                            <h6 class="collapse-header">Tenant Management:</h6>
+                            <a class="collapse-item {{ request()->routeIs('admin.tenants.index') ? 'active' : '' }}" href="{{ route('admin.tenants.index') }}">
+                                <i class="fas fa-building fa-sm fa-fw mr-2"></i> All Tenants
+                            </a>
+                            <a class="collapse-item" href="{{ route('admin.tenants.create') }}">
+                                <i class="fas fa-plus fa-sm fa-fw mr-2"></i> Add New Tenant
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </li>
+                @endif
+                
+                <!-- ==================== SINGLE MENU ITEMS (no dropdown) ==================== -->
+                <!-- Reports (if needed) -->
+                @if(auth()->user()->isAdmin())
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-fw fa-chart-line"></i>
+                        <span>Reports</span>
                     </a>
                 </li>
                 @endif
                 
-                <!-- Nav Item - Roles (only if user has view permission) -->
-                @if(auth()->user()->canViewRoles())
-                <li class="nav-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('admin.roles.index') }}">
-                        <i class="fas fa-fw fa-tags"></i>
-                        <span>Roles</span>
+                <!-- Settings -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-fw fa-cog"></i>
+                        <span>Settings</span>
                     </a>
                 </li>
-                @endif
-                
-                <!-- Nav Item - Tenants (only if user has view permission) -->
-                @if(auth()->user()->canViewTenants())
-                <li class="nav-item {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('admin.tenants.index') }}">
-                        <i class="fas fa-fw fa-building"></i>
-                        <span>Tenants</span>
-                    </a>
-                </li>
-                @endif
             @endif
             
             <!-- Divider -->
