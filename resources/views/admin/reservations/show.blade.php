@@ -3,6 +3,7 @@
 @section('title', 'Reservation Details')
 
 @section('content')
+<div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Reservation Details</h1>
         <div>
@@ -37,11 +38,12 @@
                                     {{ ucfirst($reservation->status) }}
                                 </span>
                             </p>
-                            @if($reservation->is_extended)
-                                <p><strong>Extended:</strong> Yes ({{ $reservation->extension_count }} time(s))</p>
-                            @endif
                         </div>
                     </div>
+                    @if($reservation->notes)
+                    <hr>
+                    <p><strong>Notes:</strong> {{ $reservation->notes }}</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -52,72 +54,46 @@
                     <h6 class="m-0 font-weight-bold text-primary">Payment Details</h6>
                 </div>
                 <div class="card-body">
+                    <p><strong>Duration:</strong> {{ $reservation->duration_hours }} hour(s)</p>
                     <p><strong>Base Price:</strong> ${{ number_format($reservation->base_price, 2) }}</p>
                     <p><strong>Additional Fees:</strong> ${{ number_format($reservation->additional_fees_total, 2) }}</p>
                     <hr>
                     <h5><strong>Total Amount:</strong> ${{ number_format($reservation->total_amount, 2) }}</h5>
                     
-                    @if($reservation->additional_fees_breakdown)
+                    @php
+                        $feesBreakdown = $reservation->additional_fees_breakdown;
+                        // Decode if it's a JSON string
+                        if (is_string($feesBreakdown)) {
+                            $feesBreakdown = json_decode($feesBreakdown, true);
+                        }
+                    @endphp
+                    
+                    @if($feesBreakdown && count($feesBreakdown) > 0)
                         <hr>
                         <p><strong>Fee Breakdown:</strong></p>
-                        @foreach($reservation->additional_fees_breakdown as $fee)
-                            <small class="d-block">• {{ $fee['name'] }}: ${{ number_format($fee['calculated_amount'], 2) }}</small>
+                        @foreach($feesBreakdown as $fee)
+                            <small class="d-block">• {{ $fee['name'] ?? 'Unknown' }}: ${{ number_format($fee['calculated_amount'] ?? 0, 2) }}
+                                @if(isset($fee['type']) && $fee['type'] === 'percentage')
+                                    ({{ $fee['amount'] ?? 0 }}%)
+                                @endif
+                            </small>
                         @endforeach
                     @endif
                 </div>
             </div>
 
-            @if($reservation->status == 'confirmed' || $reservation->status == 'ongoing')
+            @if($reservation->status == 'confirmed')
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
                 </div>
                 <div class="card-body">
-                    <button class="btn btn-warning btn-block mb-2" data-toggle="modal" data-target="#extendModal">
-                        <i class="fas fa-clock"></i> Extend Reservation
-                    </button>
                     <button class="btn btn-danger btn-block" data-toggle="modal" data-target="#cancelModal">
                         <i class="fas fa-times"></i> Cancel Reservation
                     </button>
                 </div>
             </div>
             @endif
-        </div>
-    </div>
-
-
-<!-- Extend Modal -->
-<div class="modal fade" id="extendModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Extend Reservation</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form id="extendForm">
-                @csrf
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Additional Hours</label>
-                        <select name="additional_hours" class="form-control" required>
-                            <option value="1">1 Hour</option>
-                            <option value="2">2 Hours</option>
-                            <option value="3">3 Hours</option>
-                            <option value="4">4 Hours</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Additional Cost ($)</label>
-                        <input type="number" step="0.01" name="additional_cost" class="form-control" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Extend</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
@@ -132,13 +108,15 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('admin.reservations.cancel', $reservation) }}" method="POST">
+            <form action="{{ route('admin.reservations.update', $reservation) }}" method="POST">
                 @csrf
+                @method('PUT')
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Cancellation Reason</label>
                         <textarea name="cancellation_reason" class="form-control" rows="3" required></textarea>
                     </div>
+                    <input type="hidden" name="status" value="cancelled">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -148,27 +126,4 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    $('#extendForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        $.ajax({
-            url: '{{ route("admin.reservations.extend", $reservation) }}',
-            method: 'POST',
-            data: $(this).serialize(),
-            success: function(response) {
-                if (response.success) {
-                    alert(response.message);
-                    location.reload();
-                }
-            },
-            error: function(xhr) {
-                alert(xhr.responseJSON.message || 'Error extending reservation');
-            }
-        });
-    });
-</script>
-@endpush
 @endsection

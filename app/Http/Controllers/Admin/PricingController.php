@@ -24,21 +24,21 @@ class PricingController extends Controller
     public function index(Request $request)
     {
         $courtId = $request->get('court_id');
-        $query = Pricing::forTenant()->with('court', 'additionalFees');
+        $query = Pricing::with('court', 'additionalFees');
         
         if ($courtId) {
             $query->where('court_id', $courtId);
         }
         
         $pricings = $query->latest()->paginate(10);
-        $courts = Court::forTenant()->where('is_active', true)->get();
+        $courts = Court::where('is_active', true)->get();
         
         return view('admin.pricings.index', compact('pricings', 'courts', 'courtId'));
     }
 
     public function create(Request $request)
     {
-        $courts = Court::forTenant()->where('is_active', true)->get();
+        $courts = Court::where('is_active', true)->get();
         $selectedCourt = $request->get('court_id');
         $pricingTypes = [
             'standard' => 'Standard Rate',
@@ -91,11 +91,6 @@ class PricingController extends Controller
             $data['days_of_week'] = json_encode($request->days_of_week);
         }
         
-        // Convert prices to float
-        $data['base_price'] = floatval($request->base_price);
-        $data['peak_price'] = $request->peak_price ? floatval($request->peak_price) : null;
-        $data['off_peak_price'] = $request->off_peak_price ? floatval($request->off_peak_price) : null;
-        
         Pricing::create($data);
 
         return redirect()->route('admin.pricings.index', ['court_id' => $request->court_id])
@@ -104,7 +99,7 @@ class PricingController extends Controller
 
     public function edit(Pricing $pricing)
     {
-        $courts = Court::forTenant()->where('is_active', true)->get();
+        $courts = Court::where('is_active', true)->get();
         $pricingTypes = [
             'standard' => 'Standard Rate',
             'peak' => 'Peak Hours Rate',
@@ -156,11 +151,6 @@ class PricingController extends Controller
         } else {
             $data['days_of_week'] = null;
         }
-        
-        // Convert prices to float
-        $data['base_price'] = floatval($request->base_price);
-        $data['peak_price'] = $request->peak_price ? floatval($request->peak_price) : null;
-        $data['off_peak_price'] = $request->off_peak_price ? floatval($request->off_peak_price) : null;
         
         $pricing->update($data);
 

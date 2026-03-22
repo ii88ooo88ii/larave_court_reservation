@@ -94,15 +94,6 @@
                 </div>
                 
                 <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="hourly_rate">Hourly Rate ($) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" class="form-control @error('hourly_rate') is-invalid @enderror" name="hourly_rate" value="{{ old('hourly_rate', $court->hourly_rate) }}" required>
-                            @error('hourly_rate')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
                     
                     <div class="col-md-4">
                         <div class="form-group">

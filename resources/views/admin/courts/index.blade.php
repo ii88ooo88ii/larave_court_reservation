@@ -34,7 +34,6 @@
                             <th>Tenant</th>
                             <th>Type</th>
                             <th>Surface</th>
-                            <th>Hourly Rate</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -68,7 +67,6 @@
                                 </span>
                             </td>
                             <td>{{ $court->surface ? ucfirst($court->surface) : 'N/A' }}</td>
-                            <td>${{ number_format($court->hourly_rate, 2) }}/hr</td>
                             <td>
                                 <span class="badge badge-{{ $court->is_active ? 'success' : 'danger' }}">
                                     {{ $court->is_active ? 'Active' : 'Inactive' }}

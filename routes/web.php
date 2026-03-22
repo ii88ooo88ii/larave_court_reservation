@@ -72,6 +72,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('reservations-calendar', [ReservationController::class, 'calendar'])->name('reservations.calendar');
     Route::post('check-availability', [ReservationController::class, 'checkAvailability'])->name('reservations.check-availability');
     Route::get('available-slots', [ReservationController::class, 'getAvailableSlots'])->name('reservations.available-slots');
+
+    Route::post('calculate-price', [ReservationController::class, 'calculatePrice'])->name('reservations.calculate-price');
+    
 });
 
 // User Routes (Regular Users)
