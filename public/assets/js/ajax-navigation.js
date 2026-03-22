@@ -1,4 +1,13 @@
+// Set up CSRF token for ALL AJAX requests
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+});
+
 $(document).ready(function() {
+    console.log('AJAX Navigation Loaded');
+    
     // Handle all navigation links
     $(document).on('click', 'a:not([data-no-ajax])', function(e) {
         // Skip if it's an external link or has target="_blank"
@@ -16,10 +25,17 @@ $(document).ready(function() {
             return true;
         }
         
+        // Skip if it's inside a form (like logout)
+        if ($(this).closest('form').length > 0) {
+            return true;
+        }
+        
         e.preventDefault();
         
         var url = this.href;
         var title = $(this).text() || document.title;
+        
+        console.log('Loading URL via AJAX:', url);
         
         // Update URL in browser without reload
         history.pushState({ url: url }, title, url);
@@ -30,11 +46,9 @@ $(document).ready(function() {
     
     // Handle browser back/forward buttons
     $(window).on('popstate', function(e) {
-        if (e.originalEvent.state && e.originalEvent.state.url) {
-            loadContent(e.originalEvent.state.url);
-        } else {
-            loadContent(window.location.href);
-        }
+        var url = e.originalEvent.state ? e.originalEvent.state.url : window.location.href;
+        console.log('Popstate:', url);
+        loadContent(url);
     });
     
     // Function to load content via AJAX
@@ -47,20 +61,28 @@ $(document).ready(function() {
             type: 'GET',
             dataType: 'html',
             success: function(html) {
+                console.log('Content loaded successfully');
+                
                 // Extract the content area from the response
                 var $html = $(html);
                 var newContent = $html.find('#page-content-wrapper').html();
                 
                 if (newContent) {
-                    // Update content
-                    $('#page-content-wrapper').html(newContent);
+                    // Update content with fade effect
+                    $('#page-content-wrapper').fadeOut(200, function() {
+                        $(this).html(newContent).fadeIn(200);
+                    });
                 } else {
                     // Fallback: try to get the main content
                     var mainContent = $html.find('.container-fluid').html();
                     if (mainContent) {
-                        $('#page-content-wrapper').html(mainContent);
+                        $('#page-content-wrapper').fadeOut(200, function() {
+                            $(this).html(mainContent).fadeIn(200);
+                        });
                     } else {
-                        $('#page-content-wrapper').html(html);
+                        $('#page-content-wrapper').fadeOut(200, function() {
+                            $(this).html(html).fadeIn(200);
+                        });
                     }
                 }
                 
@@ -73,10 +95,72 @@ $(document).ready(function() {
                 // Hide loading indicator
                 hideLoading();
             },
-            error: function() {
-                // If AJAX fails, fallback to normal page load
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.status, error);
                 hideLoading();
-                window.location.href = url;
+                
+                // If it's a 419 error or other error, reload the page
+                window.location.reload();
+            }
+        });
+    }
+    
+    // Handle form submissions - bypass AJAX for logout
+    $(document).on('submit', 'form', function(e) {
+        // If it's the logout form, let it submit normally
+        if ($(this).attr('id') === 'logout-form') {
+            return true;
+        }
+        
+        // For other forms with data-ajax attribute, handle via AJAX
+        if ($(this).attr('data-ajax') === 'true') {
+            e.preventDefault();
+            submitFormViaAjax($(this));
+        }
+    });
+    
+    // Function to submit form via AJAX
+    function submitFormViaAjax(form) {
+        var url = form.attr('action');
+        var method = form.attr('method') || 'POST';
+        var data = form.serialize();
+        
+        showLoading();
+        
+        $.ajax({
+            url: url,
+            type: method,
+            data: data,
+            success: function(response) {
+                hideLoading();
+                
+                if (typeof response === 'object') {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        if (response.redirect) {
+                            loadContent(response.redirect);
+                        }
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                } else {
+                    var $response = $(response);
+                    var newContent = $response.find('#page-content-wrapper').html();
+                    if (newContent) {
+                        $('#page-content-wrapper').html(newContent);
+                    }
+                }
+            },
+            error: function(xhr) {
+                hideLoading();
+                if (xhr.status === 422) {
+                    var errors = xhr.responseJSON.errors;
+                    $.each(errors, function(key, value) {
+                        showAlert('danger', value[0]);
+                    });
+                } else {
+                    showAlert('danger', 'An error occurred. Please try again.');
+                }
             }
         });
     }
@@ -98,5 +182,26 @@ $(document).ready(function() {
     
     function hideLoading() {
         $('#loading-overlay').hide();
+    }
+    
+    // Show alert message
+    function showAlert(type, message) {
+        var alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 10000; min-width: 300px;">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-2"></i>
+                ${message}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `;
+        
+        $('body').append(alertHtml);
+        
+        setTimeout(function() {
+            $('.alert').fadeOut('slow', function() {
+                $(this).remove();
+            });
+        }, 3000);
     }
 });

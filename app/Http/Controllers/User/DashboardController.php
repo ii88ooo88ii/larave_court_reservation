@@ -12,6 +12,6 @@ class DashboardController extends Controller
         // Ensure session is maintained
         $request->session()->put('user_dashboard_accessed', true);
         
-        return view('admin.users.dashboard-regular');
+        return view('admin.dashboard-regular');
     }
 }
