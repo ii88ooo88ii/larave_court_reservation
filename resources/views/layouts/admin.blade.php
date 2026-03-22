@@ -53,6 +53,17 @@
         .collapse-inner a:hover {
             background-color: #f8f9fc;
         }
+        
+        /* AJAX Loading Animation */
+        .content-fade {
+            transition: opacity 0.3s ease;
+        }
+        .content-fade.fade-out {
+            opacity: 0;
+        }
+        .content-fade.fade-in {
+            opacity: 1;
+        }
     </style>
     
     @stack('styles')
@@ -363,8 +374,8 @@
                     </ul>
                 </nav>
                 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
+                <!-- Begin Page Content - THIS IS THE CONTENT AREA THAT WILL BE REPLACED -->
+                <div id="page-content-wrapper" class="container-fluid">
                     @yield('content')
                 </div>
             </div>
@@ -424,6 +435,9 @@
     
     <!-- Custom scripts for all pages -->
     <script src="{{ asset('assets/js/sb-admin-2.min.js') }}"></script>
+    
+    <!-- AJAX Navigation Script -->
+    <script src="{{ asset('assets/js/ajax-navigation.js') }}"></script>
     
     @stack('scripts')
 </body>
