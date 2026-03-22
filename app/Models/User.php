@@ -137,4 +137,10 @@ class User extends Authenticatable
     {
         return $this->role_id === 3;
     }
+
+    public function scopeForTenant($query, $tenantId = null)
+    {
+        $tenantId = $tenantId ?? auth()->user()->tenant_id;
+        return $query->where('tenant_id', $tenantId);
+    }
 }
